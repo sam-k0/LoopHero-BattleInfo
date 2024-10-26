@@ -21,7 +21,7 @@ YYTKStatus PluginUnload()
     return YYTK_OK;
 }
 
-int CodePrePatch(YYTKCodeEvent* codeEvent, void*)
+int CodePostPatch(YYTKCodeEvent* codeEvent, void*)
 {
     
     CCode* codeObj = std::get<CCode*>(codeEvent->Arguments());
@@ -43,8 +43,26 @@ int CodePrePatch(YYTKCodeEvent* codeEvent, void*)
 
         // Get the enemy hp
         YYRValue hp = Binds::CallBuiltinA("variable_instance_get", { instid, "hp" });
-        // draw the hp
-        Misc::Print(std::to_string(hp.As<double>()));
+		// get x and y of the enemy
+		YYRValue x = Binds::CallBuiltinA("variable_instance_get", { instid, "x" });
+		YYRValue y = Binds::CallBuiltinA("variable_instance_get", { instid, "y" });
+		YYRValue spr = Binds::CallBuiltinA("variable_instance_get", { instid, "sprite_index" });
+		YYRValue sprwidth = Binds::CallBuiltinA("sprite_get_width", { spr });
+
+        // Get the current font and drawing settings like valign and halign
+		YYRValue font = Binds::CallBuiltinA("draw_get_font", {});
+		YYRValue halign = Binds::CallBuiltinA("draw_get_halign", {});
+
+		// Set the font to the default font
+		Binds::CallBuiltinA("draw_set_font", { 1. });
+		Binds::CallBuiltinA("draw_set_halign", { 1. });
+
+        double sprwd = sprwidth.As<double>();
+		Binds::CallBuiltinA("draw_text_transformed", { x.As<double>() + sprwd / 2, y, "HP: " + Misc::to_string_trimmed(hp.As<double>(), 2), .5,.5,0.});
+
+		// Reset the font and drawing settings
+		Binds::CallBuiltinA("draw_set_font", { font });
+        Binds::CallBuiltinA("draw_set_halign", { halign });
 
     }
 
@@ -55,9 +73,9 @@ int CodePrePatch(YYTKCodeEvent* codeEvent, void*)
 
 void InstallPatches() // Register Pre and Post patches here
 {
-	if (LHCore::pInstallPrePatch != nullptr)
+	if (LHCore::pInstallPostPatch != nullptr)
 	{
-		LHCore::pInstallPrePatch(CodePrePatch);
+		LHCore::pInstallPostPatch(CodePostPatch);
         Misc::Print("Installed patch method(s)", CLR_GREEN);
 	}
 	else
@@ -76,6 +94,8 @@ DllExport YYTKStatus PluginEntry(
     PluginObject->PluginUnload = PluginUnload;
 
     CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)LHCore::ResolveCore, (LPVOID)pack, 0, NULL); // Wait for LHCC
+
+
 
     return YYTK_OK; // Successful PluginEntry.
 }

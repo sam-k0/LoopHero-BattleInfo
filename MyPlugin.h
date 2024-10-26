@@ -7,6 +7,7 @@
 #include <direct.h>
 #include <ostream>
 #include <sstream>
+#include <iomanip>
 // YYTK 
 #define YYSDK_PLUGIN // Declare the following code as a plugin
 //#define DEBUG // enables more prints
@@ -141,6 +142,22 @@ namespace Misc {
             Misc::Print(static_cast<const char*>(item), c);
         }
     }
+
+    std::string to_string_trimmed(double value, int prec) {
+        std::ostringstream out;
+        out << std::fixed << std::setprecision(prec) << value;  // Set the precision to 2 or whatever you need
+        std::string str = out.str();
+
+        // Remove trailing zeros
+        str.erase(str.find_last_not_of('0') + 1, std::string::npos);
+
+        // Remove the decimal point if it's the last character (e.g., "5.")
+        if (str.back() == '.') {
+            str.pop_back();
+        }
+
+        return str;
+    }
 }
 
 namespace Binds {
@@ -162,4 +179,38 @@ namespace Binds {
         CallBuiltin(var, name, nullptr, nullptr, args);
         return var;
     }
+
+    void PrintArrayInstanceVariables(YYRValue var, YYRValue inst, Color c = Color::CLR_DEFAULT)
+    {
+        YYRValue len;
+        YYRValue item;
+        YYRValue content;
+        YYRValue type;
+        CallBuiltin(len, "array_length_1d", nullptr, nullptr, { var });
+
+        for (int i = 0; i < (int)len; i++)
+        {
+            CallBuiltin(item, "array_get", nullptr, nullptr, { var, (double)i });
+            CallBuiltin(content, "variable_instance_get", nullptr, nullptr, { inst, static_cast<const char*>(item) });
+            CallBuiltin(type, "typeof", nullptr, nullptr, { content });
+            std::string typestr = std::string(static_cast<const char*>(type));
+            std::string message = std::string(static_cast<const char*>(item)) + " -> " + std::string(static_cast<const char*>(type));
+
+            if (typestr == "number")
+            {
+                message += " : " + std::to_string((int)content);
+            }
+            else if (typestr == "bool")
+            {
+                message += " : " + std::to_string(int((bool)content));
+            }
+            else if (typestr == "string")
+            {
+                message += " : " + std::string(static_cast<const char*>(content));
+            }
+
+            Misc::Print(message);
+        }
+    }
+
 }
