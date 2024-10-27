@@ -118,7 +118,7 @@ void InstallPatches() // Register Pre and Post patches here
 	{
 		LHCore::pInstallPrePatch(CodePrePatch);
 		LHCore::pInstallPostPatch(CodePostPatch);
-        Misc::Print("Installed patch method(s)", CLR_GREEN);
+        Misc::PrintDbg("Installed patch method(s)", __FUNCTION__, __LINE__, CLR_GREEN);
 	}
 
 
@@ -132,8 +132,6 @@ void InstallPatches() // Register Pre and Post patches here
             TextOffsetX = Config::ReadIntFromIni(cfgFilename, SectionName, KeyNameTextOffsetX, 0);
             TextOffsetY = Config::ReadIntFromIni(cfgFilename, SectionName, KeyNameTextOffsetY, 0);
             TextSize = Config::ReadDoubleFromIni(cfgFilename, SectionName, KeyNameTextSize, 0.5);
-
-            Misc::Print("Read text size: " + std::to_string(TextSize));
 		}
 		else
 		{

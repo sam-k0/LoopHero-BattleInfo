@@ -40,9 +40,7 @@ namespace LHCore {
 
     DWORD WINAPI ResolveCore(LPVOID lpParam)
     {
-        Misc::Print("Unpacking struct");
         CoreReadyPack* pack =(CoreReadyPack*)(lpParam);
-        Misc::Print("Importing Core function");
         void* rawCoreReady;
         void* rawRegisterModule;
         void* rawUnregisterModule;
@@ -115,7 +113,7 @@ namespace LHCore {
                     return TRUE;
                 }
             }
-            Misc::Print("Waiting for Core. Did you install LoopHeroCallbackCore.dll?", CLR_RED);
+            Misc::PrintDbg("Waiting for Core. Did you install LoopHeroCallbackCore.dll?", __FUNCTION__, __LINE__, CLR_RED);
         }
     }
 
