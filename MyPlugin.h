@@ -16,7 +16,7 @@
 
 HINSTANCE DllHandle; // Self modhandle
 
-std::string gPluginName = "yourname.modname.yytk";
+std::string gPluginName = "sam-k0.BattleInfo.yytk";
 
 
 DllExport std::string GetPluginName() // For yytk
@@ -207,7 +207,11 @@ namespace Binds {
             else if (typestr == "string")
             {
                 message += " : " + std::string(static_cast<const char*>(content));
-            }
+			}
+			else
+			{
+                message += " : ";
+			}
 
             Misc::Print(message);
         }
